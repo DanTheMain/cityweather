@@ -1,0 +1,14 @@
+[tool.poetry]
+name = "cityweather"
+version = "0.1.0"
+description = "API for providing weather data by city name"
+authors = ["DanTheMain <Daniil.Morozov80@yandex.ru>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
