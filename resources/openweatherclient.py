@@ -59,8 +59,7 @@ class OpenWeatherClient:
         self._units = "metric"
 
     def _load_api_resources(self) -> None:
-        if not load_dotenv():
-            raise Exception("Failed to load api resources")
+        load_dotenv()
 
     def get_city_location_data(
         self, city_name: str, limit_listings_to: int

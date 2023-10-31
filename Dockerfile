@@ -12,4 +12,4 @@ RUN poetry install --no-interaction
 COPY resources /app/resources
 COPY cityweather.py /app
 
-CMD ["uvicorn", "app:cityweather", "--host", "0.0.0.0", "--port", "8080"]
+CMD ["uvicorn", "cityweather:cityweather", "--host", "0.0.0.0", "--port", "8080"]

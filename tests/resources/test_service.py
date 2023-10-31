@@ -39,20 +39,20 @@ def generate_weather():
     )
 
 
-@pytest.fixture
-def mock_open_weather_client(generate_cities, generate_weather):
-    client = Mock()
-    client.get_city_location_data().return_value = generate_cities
-    client.get_weather_by_coordinates().return_value = generate_weather
-    return client
-
-
 def test__service_get_city_weather_data__returns_expected_weather(
-    generate_cities, generate_weather, mock_open_weather_client
+    generate_cities,
+    generate_weather,
 ):
-    with patch(
-        "resources.openweatherclient.OpenWeatherClient.weather_client"
-    ) as mock_open_weather_client:
+    with (
+        patch(
+            "resources.openweatherclient.OpenWeatherClient.get_city_location_data"
+        ) as mock_get_city_location_data,
+        patch(
+            "resources.openweatherclient.OpenWeatherClient.get_weather_by_coordinates"
+        ) as mock_get_weather_by_coordinates,
+    ):
+        mock_get_city_location_data.return_value = generate_cities
+        mock_get_weather_by_coordinates.return_value = generate_weather
         assert (
             OpenWeatherService().get_city_weather_data("test_city", 1)[0].weather
             == generate_weather
