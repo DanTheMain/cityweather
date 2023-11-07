@@ -4,7 +4,6 @@ from unittest.mock import patch
 from random import choice
 
 from cityweather.service import OpenWeatherService, OpenWeatherClient
-from cityweather.schemas import OpenWeatherClientConfig
 from cityweather.openweatherclient import City, Weather, WIND_DIRECTIONS
 
 
@@ -43,13 +42,8 @@ def weather():
 
 
 @pytest.fixture
-def mock_open_weather_client_config():
-    return OpenWeatherClientConfig(base_url="_", token="_")
-
-
-@pytest.fixture
-def mock_open_weather_client(mock_open_weather_client_config):
-    return OpenWeatherClient(mock_open_weather_client_config)
+def mock_open_weather_client():
+    return OpenWeatherClient("_", "_", "_")
 
 
 def test__service_get_city_weather_data__returns_expected_weather(

@@ -6,18 +6,20 @@ import uvicorn
 from fastapi import FastAPI
 
 from cityweather.service import OpenWeatherService, OpenWeatherClient
-from cityweather.schemas import OpenWeatherClientConfig
+from config import load_config
 
 load_dotenv()
-app = FastAPI()
-weather_data_provider = OpenWeatherService(
-    OpenWeatherClient(
-        OpenWeatherClientConfig(
-            base_url=environ["OPENWEATHER_URL"],
-            token=environ["OPENWEATHER_API_TOKEN"],
-        )
-    )
+
+config = load_config()
+openweather_client = OpenWeatherClient(
+    base_url=config.openweather.base_url,
+    token=config.openweather.token,
+    units=config.openweather.units,
 )
+weather_data_provider = OpenWeatherService(openweather_client)
+
+
+app = FastAPI()
 
 
 @app.get("/weather/{city_name}")

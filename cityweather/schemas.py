@@ -2,12 +2,6 @@ from dataclasses import dataclass
 
 
 @dataclass
-class OpenWeatherClientConfig:
-    base_url: str
-    token: str
-
-
-@dataclass
 class City:
     name: str
     country: str

@@ -1,6 +1,6 @@
 import httpx
 from httpx import QueryParams
-from cityweather.schemas import City, Weather, OpenWeatherClientConfig
+from cityweather.schemas import City, Weather
 
 WIND_DIRECTIONS = [
     "N",
@@ -29,10 +29,11 @@ def get_cardinal_bearing_from_degrees(degrees: int) -> str:
 
 
 class OpenWeatherClient:
-    def __init__(self, client_config: OpenWeatherClientConfig):
-        self._cfg = client_config
-        self.client = httpx.Client(base_url=self._cfg.base_url)
-        self._units = "metric"
+    def __init__(self, base_url: str, token: str, units: str):
+        self._base_url = base_url
+        self._token = token
+        self.client = httpx.Client(base_url=self._base_url)
+        self._units = units
 
     def get_city_location_data(
         self, city_name: str, limit_listings_to: int
@@ -41,7 +42,7 @@ class OpenWeatherClient:
             {
                 "q": city_name,
                 "limit": limit_listings_to,
-                "appid": self._cfg.token,
+                "appid": self._token,
             }
         )
         response = self.client.get(url="geo/1.0/direct", params=params)
@@ -66,19 +67,23 @@ class OpenWeatherClient:
                 "lat": lat,
                 "lon": lon,
                 "units": self._units,
-                "appid": self._cfg.token,
+                "appid": self._token,
             }
         )
         response = self.client.get(url="data/2.5/weather", params=params)
         response.raise_for_status()
         payload = response.json()
         return Weather(
-            temp=f'{payload["main"]["temp"]} C',
-            pressure=f'{payload["main"]["pressure"]} hPa',
-            humidity=f'{payload["main"]["humidity"]} %',
-            wind_speed=f'{payload["wind"]["speed"]} m/s',
+            temp=f'{payload["main"]["temp"]}C',
+            pressure=f'{payload["main"]["pressure"]}hPa',
+            humidity=f'{payload["main"]["humidity"]}%',
+            wind_speed=f'{payload["wind"]["speed"]}m/s',
             wind_direction=f'{get_cardinal_bearing_from_degrees(payload["wind"]["deg"])}',
-            clouds=f'{payload["clouds"]["all"]} % chance',
-            rain=f'{payload["rain"]["1h"]} mm/h' if "rain" in payload else "no rain",
-            snow=f'{payload["snow"]["1h"]} mm/h' if "snow" in payload else "no snow",
+            clouds=f'{payload["clouds"]["all"]}% chance',
+            rain=f'{payload["rain"]["1h"]} mm/h'
+            if "rain" in payload
+            else "no rain data",
+            snow=f'{payload["snow"]["1h"]} mm/h'
+            if "snow" in payload
+            else "no snow data",
         )
