@@ -1,12 +1,23 @@
 from os import environ
+from dotenv import load_dotenv
+
 
 import uvicorn
 from fastapi import FastAPI
 
-from resources.service import OpenWeatherService
+from cityweather.service import OpenWeatherService, OpenWeatherClient
+from cityweather.schemas import OpenWeatherClientConfig
 
+load_dotenv()
 app = FastAPI()
-weather_data_provider = OpenWeatherService()
+weather_data_provider = OpenWeatherService(
+    OpenWeatherClient(
+        OpenWeatherClientConfig(
+            base_url=environ["OPENWEATHER_URL"],
+            token=environ["OPENWEATHER_API_TOKEN"],
+        )
+    )
+)
 
 
 @app.get("/weather/{city_name}")
@@ -17,7 +28,6 @@ def get_city_weather(city_name: str):
 
 
 if __name__ == "__main__":
-    # TODO: figure out how to load .env here
     host = environ["WEATHER_HOST"]
     port = environ["WEATHER_PORT"]
     log_level = environ["WEATHER_APP_LOG_LEVEL"]

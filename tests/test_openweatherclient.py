@@ -1,7 +1,6 @@
 import pytest
-from resources.openweatherclient import (
+from cityweather.openweatherclient import (
     get_cardinal_bearing_from_degrees,
-    WIND_DIRECTIONS,
 )
 
 

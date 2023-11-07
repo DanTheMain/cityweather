@@ -1,9 +1,6 @@
-from dataclasses import dataclass
-from dotenv import load_dotenv
-from os import environ
-
 import httpx
-
+from httpx import QueryParams
+from cityweather.schemas import City, Weather, OpenWeatherClientConfig
 
 WIND_DIRECTIONS = [
     "N",
@@ -31,45 +28,23 @@ def get_cardinal_bearing_from_degrees(degrees: int) -> str:
     return WIND_DIRECTIONS[ix % len(WIND_DIRECTIONS)]
 
 
-@dataclass
-class City:
-    name: str
-    country: str
-    state: str
-    lat: float
-    lon: float
-
-
-@dataclass
-class Weather:
-    temp: str
-    pressure: str
-    humidity: str
-    wind_speed: str
-    wind_direction: str
-    clouds: str
-    rain: str
-    snow: str
-
-
 class OpenWeatherClient:
-    def __init__(self):
-        self._load_api_resources()
-        self.weather_client = httpx.Client(base_url=environ["OPENWEATHER_URL"])
+    def __init__(self, client_config: OpenWeatherClientConfig):
+        self._cfg = client_config
+        self.client = httpx.Client(base_url=self._cfg.base_url)
         self._units = "metric"
-
-    def _load_api_resources(self) -> None:
-        load_dotenv()
 
     def get_city_location_data(
         self, city_name: str, limit_listings_to: int
     ) -> list[City]:
-        params = {
-            "q": f"{city_name}",
-            "limit": limit_listings_to,
-            "appid": environ["OPENWEATHER_API_TOKEN"],
-        }
-        response = self.weather_client.get(url="geo/1.0/direct", params=params)
+        params = QueryParams(
+            {
+                "q": city_name,
+                "limit": limit_listings_to,
+                "appid": self._cfg.token,
+            }
+        )
+        response = self.client.get(url="geo/1.0/direct", params=params)
         response.raise_for_status()
         payload = response.json()
         cities = []
@@ -83,17 +58,18 @@ class OpenWeatherClient:
                     lon=city["lon"],
                 )
             )
-        print(cities)
         return cities
 
     def get_weather_by_coordinates(self, lat: float, lon: float) -> Weather:
-        params = {
-            "lat": lat,
-            "lon": lon,
-            "units": self._units,
-            "appid": environ["OPENWEATHER_API_TOKEN"],
-        }
-        response = self.weather_client.get(url="data/2.5/weather", params=params)
+        params = QueryParams(
+            {
+                "lat": lat,
+                "lon": lon,
+                "units": self._units,
+                "appid": self._cfg.token,
+            }
+        )
+        response = self.client.get(url="data/2.5/weather", params=params)
         response.raise_for_status()
         payload = response.json()
         return Weather(
