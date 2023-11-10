@@ -48,7 +48,6 @@ class OpenWeatherClient:
         response = self.client.get(url="geo/1.0/direct", params=params)
         response.raise_for_status()
         payload = response.json()
-        print(response.json())
         cities = []
         for city in payload:
             cities.append(
@@ -75,7 +74,6 @@ class OpenWeatherClient:
         response = self.client.get(url="data/2.5/weather", params=params)
         response.raise_for_status()
         payload = response.json()
-        print(f"payLOAD: {payload}")
         res = Weather(
             temp=f'{payload["main"]["temp"]}C',
             pressure=f'{payload["main"]["pressure"]}hPa',
@@ -90,5 +88,4 @@ class OpenWeatherClient:
             if "snow" in payload
             else "no snow data",
         )
-        print(res)
         return res

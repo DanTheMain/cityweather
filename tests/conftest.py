@@ -1,10 +1,13 @@
 import pytest
+from unittest.mock import patch
 import json
 from faker import Faker
 from random import choice
 
 from cityweather.service import OpenWeatherClient
 from cityweather.openweatherclient import City, Weather, WIND_DIRECTIONS
+
+from cityweather.service import OpenWeatherService
 
 
 fake = Faker()
@@ -44,6 +47,24 @@ def weather():
 @pytest.fixture
 def mock_open_weather_client():
     return OpenWeatherClient("_", "_", "_")
+
+
+@pytest.fixture
+def mock_open_weather_service(cities, weather, mock_open_weather_client):
+    with (
+        patch(
+            "cityweather.openweatherclient.OpenWeatherClient.get_city_location_data"
+        ) as mock_get_city_location_data,
+        patch(
+            "cityweather.openweatherclient.OpenWeatherClient.get_weather_by_coordinates"
+        ) as mock_get_weather_by_coordinates,
+    ):
+        service = OpenWeatherService(mock_open_weather_client)
+        default_num_listings = service.city_name_matches_limit
+        mock_get_city_location_data.return_value = cities(default_num_listings)
+        mock_get_weather_by_coordinates.return_value = weather
+
+        yield service
 
 
 @pytest.fixture

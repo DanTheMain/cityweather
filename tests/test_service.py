@@ -41,19 +41,8 @@ def test__service_get_city_weather_data__returns_no_weather_with_empty_cities_li
 
 
 def test__service_get_city_weather_data__returns_default_number_of_weather_listings_with_default_locations_limit(
-    cities, weather, mock_open_weather_client
+    mock_open_weather_service,
 ):
-    with (
-        patch(
-            "cityweather.openweatherclient.OpenWeatherClient.get_city_location_data"
-        ) as mock_get_city_location_data,
-        patch(
-            "cityweather.openweatherclient.OpenWeatherClient.get_weather_by_coordinates"
-        ) as mock_get_weather_by_coordinates,
-    ):
-        service = OpenWeatherService(mock_open_weather_client)
-        default_num_listings = service.city_name_matches_limit
-        mock_get_city_location_data.return_value = cities(default_num_listings)
-        mock_get_weather_by_coordinates.return_value = weather
+    returned_listings = mock_open_weather_service.get_city_weather_data("_")
 
-        assert len(service.get_city_weather_data("_")) == default_num_listings
+    assert len(returned_listings) == mock_open_weather_service.city_name_matches_limit
