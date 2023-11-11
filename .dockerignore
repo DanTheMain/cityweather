@@ -1,5 +1,6 @@
 node_modules
 venvpy3
-resources/dev_env_config.properties
 .gitignore
 .dockerignore
+.git
+.venv

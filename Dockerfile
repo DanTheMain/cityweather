@@ -1,11 +1,15 @@
-FROM python:latest
+FROM python:3.11-slim
 
-WORKDIR . /app
+WORKDIR /app
 
-COPY requirements.txt .
+RUN python -m pip install 'poetry==1.6.1'
 
-RUN python3 -m pip install -r requirements.txt
+COPY pyproject.toml poetry.lock  /app/
 
-COPY . /app
+RUN poetry config virtualenvs.create false
+RUN poetry install --no-interaction
 
-CMD ["python3", "/app/cityweather.py"]
+COPY resources /app/resources
+COPY cityweather/app.py /app
+
+CMD ["uvicorn", "cityweather.app:app", "--host", "0.0.0.0", "--port", "8080"]
