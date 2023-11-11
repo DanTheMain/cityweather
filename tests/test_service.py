@@ -3,7 +3,7 @@ from cityweather.service import OpenWeatherService
 
 
 def test__service_get_city_weather_data__returns_expected_weather(
-    cities, weather, mock_open_weather_client
+    make_cities, weather, mock_open_weather_client
 ):
     with (
         patch(
@@ -13,7 +13,7 @@ def test__service_get_city_weather_data__returns_expected_weather(
             "cityweather.openweatherclient.OpenWeatherClient.get_weather_by_coordinates"
         ) as mock_get_weather_by_coordinates,
     ):
-        cities = cities(1)
+        make_cities = make_cities(1)
         mock_get_city_location_data.return_value = cities
         mock_get_weather_by_coordinates.return_value = weather
 
@@ -26,8 +26,8 @@ def test__service_get_city_weather_data__returns_expected_weather(
         assert actual_weather == weather
 
 
-def test__service_get_city_weather_data__returns_no_weather_with_empty_cities_listings(
-    cities, weather, mock_open_weather_client
+def test__get_city_weather_data__returns_no_weather_with_empty_cities_listings(
+    make_cities, weather, mock_open_weather_client
 ):
     with patch(
         "cityweather.openweatherclient.OpenWeatherClient.get_city_location_data"
@@ -40,9 +40,18 @@ def test__service_get_city_weather_data__returns_no_weather_with_empty_cities_li
         )
 
 
-def test__service_get_city_weather_data__returns_default_number_of_weather_listings_with_default_locations_limit(
-    mock_open_weather_service,
+def test__get_city_weather_data__returns_full_weather_data_without_locations_limit(
+    open_weather_service, city_name, make_cities, weather
 ):
-    returned_listings = mock_open_weather_service.get_city_weather_data("_")
+    open_weather_service.client.get_city_location_data.return_value = make_cities(
+        num_cities=10
+    )
+    open_weather_service.client.get_weather_by_coordinates.return_value = weather
 
-    assert len(returned_listings) == mock_open_weather_service.city_name_matches_limit
+    open_weather_service.get_city_weather_data(city_name)
+
+    assert open_weather_service.client.get_city_location_data.call_count == 1
+    call_kwargs = open_weather_service.client.get_city_location_data.call_args.kwargs
+
+    assert call_kwargs["limit_listings_to"] == open_weather_service.city_name_matches_limit
+

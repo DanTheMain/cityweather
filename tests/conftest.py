@@ -1,5 +1,5 @@
 import pytest
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 import json
 from faker import Faker
 from random import choice
@@ -10,22 +10,48 @@ from cityweather.openweatherclient import City, Weather, WIND_DIRECTIONS
 from cityweather.service import OpenWeatherService
 
 
-fake = Faker()
-
-
 @pytest.fixture
-def cities():
+def make_cities(faker):
     def inner(num_cities: int | None = None):
         return [
             City(
-                name=fake.city(),
-                country=f"{fake.first_name()}_country",
-                state=f"{fake.first_name()}_state",
-                lat=fake.coordinate(),
-                lon=fake.coordinate(),
+                name=faker.city(),
+                country=f"{faker.first_name()}_country",
+                state=f"{faker.first_name()}_state",
+                lat=faker.coordinate(),
+                lon=faker.coordinate(),
             )
             for _ in range(num_cities or choice(range(1, 10)))
         ]
+
+    return inner
+
+
+@pytest.fixture
+def make_city(faker):
+    def inner(name: str | None = None, country: str | None = None, state: str | None = None, lat: float | None = None, lon: float | None = None):
+        return City(
+            name=name or faker.city(),
+            country=country or faker.pystr(),
+            state=state or faker.pystr(),
+            lat=lat or faker.coordinate(),
+            lon=lon or faker.coordinate(),
+        )
+
+    return inner
+
+
+
+@pytest.fixture
+def make_location_payload(faker):
+    def inner(name = None, lat = None, lon = None, country = None, state = None):
+        return {
+            "name": name or "Moscow",
+            "lat": lat or 46.7323875,
+            "lon": lon or -117.0001651,
+            "country": country or "US",
+            "state": state or "Idaho",
+        }
 
     return inner
 
@@ -49,8 +75,18 @@ def mock_open_weather_client():
     return OpenWeatherClient("_", "_", "_")
 
 
+@pytest.fixture()
+def open_weather_service():
+    return OpenWeatherService(MagicMock(OpenWeatherClient))
+
+
 @pytest.fixture
-def mock_open_weather_service(cities, weather, mock_open_weather_client):
+def city_name(faker):
+    return faker.city()
+
+
+@pytest.fixture
+def mock_open_weather_service(make_cities, weather, mock_open_weather_client):
     with (
         patch(
             "cityweather.openweatherclient.OpenWeatherClient.get_city_location_data"
@@ -61,7 +97,7 @@ def mock_open_weather_service(cities, weather, mock_open_weather_client):
     ):
         service = OpenWeatherService(mock_open_weather_client)
         default_num_listings = service.city_name_matches_limit
-        mock_get_city_location_data.return_value = cities(default_num_listings)
+        mock_get_city_location_data.return_value = make_cities(default_num_listings)
         mock_get_weather_by_coordinates.return_value = weather
 
         yield service

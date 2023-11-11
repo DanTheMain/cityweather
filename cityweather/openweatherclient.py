@@ -36,7 +36,7 @@ class OpenWeatherClient:
         self.units = units
 
     def get_city_location_data(
-        self, city_name: str, limit_listings_to: int | None = None
+        self, city_name: str, limit_listings_to: int
     ) -> list[City]:
         params = QueryParams(
             {

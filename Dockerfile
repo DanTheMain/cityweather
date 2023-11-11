@@ -10,6 +10,6 @@ RUN poetry config virtualenvs.create false
 RUN poetry install --no-interaction
 
 COPY resources /app/resources
-COPY app.py /app
+COPY cityweather/app.py /app
 
-CMD ["uvicorn", "cityweather:cityweather", "--host", "0.0.0.0", "--port", "8080"]
+CMD ["uvicorn", "cityweather.app:app", "--host", "0.0.0.0", "--port", "8080"]

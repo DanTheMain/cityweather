@@ -52,7 +52,7 @@ def test__client_get_city_location_data__raises_not_found_response(respx_mock):
         assert mock_client.get_city_location_data("_")
 
 
-def test__client_get_city_location_data__responds_with_expected_city_data_listings(
+def test__get_city_location_data__responds_with_expected_city_data_listings(
     respx_mock, mock_city_data_response
 ):
     expected_response = httpx.Response(
@@ -62,7 +62,7 @@ def test__client_get_city_location_data__responds_with_expected_city_data_listin
     mock_client = OpenWeatherClient(BASE_MOCK_URL, "_", "_")
 
     assert (
-        mock_client.get_city_location_data("_") == mock_city_data_response["city_data"]
+        mock_client.get_city_location_data("_", 5) == mock_city_data_response["city_data"]
     )
 
 
